@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:padding="16dp"
+    tools:context=".ui.MusicActivity">
+
+    <!-- 顶部区域：输入URL和播放按钮 -->
+    <EditText
+        android:id="@+id/edt_url"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="输入音乐URL"
+        android:inputType="textUri"
+        android:padding="12dp"
+        android:background="@android:drawable/editbox_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_play_url"
+        android:layout_marginEnd="8dp"/>
+
+    <Button
+        android:id="@+id/btn_play_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="载入"
+        android:textSize="14sp"
+        app:layout_constraintTop_toTopOf="@id/edt_url"
+        app:layout_constraintBottom_toBottomOf="@id/edt_url"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 本地音乐标题 -->
+    <TextView
+        android:id="@+id/tv_local_songs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="本地音乐"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/edt_url"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- 音乐列表 -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_local_songs"
+        app:layout_constraintBottom_toTopOf="@id/tv_song_info">
+
+        <ListView
+            android:id="@+id/lv_local_songs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="1dp"
+            android:scrollbars="vertical"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- 当前歌曲信息 -->
+    <TextView
+        android:id="@+id/tv_song_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="当前歌曲：无"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toTopOf="@id/tv_current_time"/>
+
+    <!-- 进度条和时间显示 -->
+    <TextView
+        android:id="@+id/tv_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textSize="12sp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_previous"/>
+
+    <TextView
+        android:id="@+id/tv_total_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textSize="12sp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_next"/>
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toEndOf="@id/tv_current_time"
+        app:layout_constraintEnd_toStartOf="@id/tv_total_time"
+        app:layout_constraintBottom_toTopOf="@id/btn_play_pause"/>
+
+    <!-- 播放控制按钮 -->
+    <Button
+        android:id="@+id/btn_previous"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="上一首"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_rewind"/>
+
+    <Button
+        android:id="@+id/btn_play_pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="播放"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_rewind"/>
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="下一首"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_forward"/>
+
+    <!-- 快进快退按钮 -->
+
+    <Button
+        android:id="@+id/btn_rewind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:text="快退"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_forward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="72dp"
+        android:text="快进"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

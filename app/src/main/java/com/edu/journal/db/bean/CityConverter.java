@@ -1,0 +1,25 @@
+package com.edu.journal.db.bean;
+
+import androidx.room.TypeConverter;
+
+import java.lang.reflect.Type;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CityConverter {
+    @TypeConverter
+    public List<Province.City> stringToObject(String value) {
+        Type userListType = new TypeToken<ArrayList<Province.City>>() {}.getType();
+        //string转json
+        return new Gson().fromJson(value, userListType);
+    }
+
+    @TypeConverter
+    public String objectToString(List<Province.City> list) {
+        return new Gson().toJson(list);
+    }
+
+}

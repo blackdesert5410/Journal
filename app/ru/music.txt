@@ -1,0 +1,179 @@
+
+
+
+
+
+
+package com.edu.journal.ui;
+
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import com.edu.journal.R;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class MusicActivity extends AppCompatActivity {
+
+    private EditText edtUrl;
+    private Button btnPlayUrl, btnPlayPause, btnPrevious, btnNext, btnRewind, btnForward;
+    private ListView lvLocalSongs;
+    private TextView tvSongInfo;
+    private MediaPlayer mediaPlayer;
+    private ArrayList<String> localSongsList;
+    private ArrayAdapter<String> songsAdapter;
+    private int currentSongIndex = -1;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_music);
+
+        edtUrl = findViewById(R.id.edt_url);
+        btnPlayUrl = findViewById(R.id.btn_play_url);
+        btnPlayPause = findViewById(R.id.btn_play_pause);
+        btnPrevious = findViewById(R.id.btn_previous);
+        btnNext = findViewById(R.id.btn_next);
+        btnRewind = findViewById(R.id.btn_rewind);
+        btnForward = findViewById(R.id.btn_forward);
+        lvLocalSongs = findViewById(R.id.lv_local_songs);
+        tvSongInfo = findViewById(R.id.tv_song_info);
+
+        localSongsList = new ArrayList<>();
+        songsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, localSongsList);
+        lvLocalSongs.setAdapter(songsAdapter);
+
+        // Check for storage permissions
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        } else {
+            loadLocalSongs();
+        }
+
+        mediaPlayer = new MediaPlayer();
+
+        // Play online music
+        btnPlayUrl.setOnClickListener(v -> {
+            String url = edtUrl.getText().toString();
+            if (!url.isEmpty()) {
+                try {
+                    mediaPlayer.reset();
+                    mediaPlayer.setDataSource(url);
+                    mediaPlayer.prepareAsync();
+                    mediaPlayer.setOnPreparedListener(mp -> {
+                        mp.start();
+                        tvSongInfo.setText("正在播放：在线音乐");
+                        btnPlayPause.setText("暂停");
+                    });
+                } catch (IOException e) {
+                    Toast.makeText(this, "无法播放该URL", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // Play or pause music
+        btnPlayPause.setOnClickListener(v -> {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                btnPlayPause.setText("播放");
+            } else {
+                mediaPlayer.start();
+                btnPlayPause.setText("暂停");
+            }
+        });
+
+        // Next song
+        btnNext.setOnClickListener(v -> playNextSong());
+
+        // Previous song
+        btnPrevious.setOnClickListener(v -> playPreviousSong());
+
+        // Rewind (快退)
+        btnRewind.setOnClickListener(v -> {
+            int currentPosition = mediaPlayer.getCurrentPosition();
+            int rewindPosition = currentPosition - 10000; // 10 seconds
+            if (rewindPosition < 0) rewindPosition = 0;
+            mediaPlayer.seekTo(rewindPosition);
+        });
+
+        // Forward (快进)
+        btnForward.setOnClickListener(v -> {
+            int currentPosition = mediaPlayer.getCurrentPosition();
+            int forwardPosition = currentPosition + 10000; // 10 seconds
+            int duration = mediaPlayer.getDuration();
+            if (forwardPosition > duration) forwardPosition = duration;
+            mediaPlayer.seekTo(forwardPosition);
+        });
+
+        // Handle list item click (local music)
+        lvLocalSongs.setOnItemClickListener((parent, view, position, id) -> {
+            currentSongIndex = position;
+            playLocalMusic(position);
+        });
+    }
+
+    private void loadLocalSongs() {
+        String[] projection = {MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA};
+        android.database.Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String songTitle = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String songPath = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                localSongsList.add(songTitle + " | " + songPath);
+            }
+            cursor.close();
+            songsAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void playLocalMusic(int position) {
+        try {
+            String songPath = localSongsList.get(position).split(" \\| ")[1];
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(songPath);
+            mediaPlayer.prepareAsync();
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                tvSongInfo.setText("正在播放：" + localSongsList.get(position).split(" \\| ")[0]);
+                btnPlayPause.setText("暂停");
+            });
+        } catch (IOException e) {
+            Toast.makeText(this, "无法播放该本地音乐", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void playNextSong() {
+        if (currentSongIndex < localSongsList.size() - 1) {
+            currentSongIndex++;
+            playLocalMusic(currentSongIndex);
+        } else {
+            Toast.makeText(this, "已是最后一首", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void playPreviousSong() {
+        if (currentSongIndex > 0) {
+            currentSongIndex--;
+            playLocalMusic(currentSongIndex);
+        } else {
+            Toast.makeText(this, "已是第一首", Toast.LENGTH_SHORT).show();
+        }
+    }
+}
